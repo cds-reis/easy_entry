@@ -8,6 +8,7 @@ void main() {
   final helloWorld = map
       .entry(10)
       .andModify((value) => value.add('World'))
+      .retainIf((value) => value.length == 2)
       .orInsert(['Default']);
 
   print(helloWorld);

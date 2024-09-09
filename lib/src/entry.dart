@@ -38,6 +38,15 @@ final class Entry<K, V> {
   ///
   /// If the key is present in the map, the provided function [f] is applied to
   /// the existing value. If the key is not present, the map remains unchanged.
+  ///
+  /// ```dart
+  /// final planets = <String, List<String>>{
+  ///   'terrestrial': 'Mercury', 'Venus', 'Earth',
+  /// };
+  /// map.entry('terrestrial').andModify((value) => value.add('Mars'));
+  ///
+  /// print(map); // {'terrestrial': 'Mercury', 'Venus', 'Earth', 'Mars'};
+  /// ```
   Entry<K, V> andModify(void Function(V value) f) {
     final value = _map[key];
     if (value == null) {
@@ -49,26 +58,80 @@ final class Entry<K, V> {
     return Entry._(key: key, map: _map);
   }
 
+  /// Retains the element in the map if the entry satisfies the predicate [test],
+  /// otherwise removes this entry from the map.
+  ///
+  /// Does nothing if the [key] is not present in the map.
+  ///
+  /// It is preferable that [test] does not modify [value].
+  ///
+  /// ```dart
+  /// final map = {'key': 10};
+  ///
+  /// map.entry('key').retainIf((value) => value > 20);
+  ///
+  /// print(map); // {}
+  /// ```
+  Entry<K, V> retainIf(bool Function(V value) test) {
+    final value = _map[key];
+
+    if (value == null || test(value)) {
+      return Entry._(key: key, map: _map);
+    }
+
+    final _ = _map.remove(key);
+
+    return Entry._(key: key, map: _map);
+  }
+
+  /// Removes this entry from the map.
+  ///
+  /// Returns the entry value if the entry existed, null otherwise.
+  V? remove() => _map.remove(key);
+
+  /// Wheter this entry exists in this map.
+  bool get exists => _map.containsKey(key);
+
+  /// Returns the value associated with the key if exists.
+  ///
+  /// If the key is not present, returns null.
+  V? get orNull => _map[key];
+
   /// Inserts a value into the map if the key is not already present.
   ///
-  /// If the key is not present in the map, the provided [value] is inserted.
-  /// If the key is already present, the existing value is returned.
+  /// ```dart
+  /// final map = {'key': 10};
+  ///
+  /// print(map.entry('key').orInsert(0)); // 10
+  /// print(map.entry('other').orInsert(0)); // 0
+  /// ```
   V orInsert(V value) => _map[key] ??= value;
 
   /// Lazily inserts a value into the map if the key is not already present.
   ///
-  /// If the key is not present in the map, the value returned by the provided
-  /// function [f] is inserted. If the key is already present, the existing
-  /// value is returned.
+  /// ```dart
+  /// final map = {'key': 10};
+  ///
+  /// print(map.entry('key').orInsertWith(() => 0)); // 10
+  /// print(map.entry('other').orInsertWith(() => 0)); // 0
+  /// ```
   V orInsertWith(V Function() f) => _map[key] ??= f();
 
-  /// Inserts a value into the map if the key is not already present, using
-  /// a factory function that depends on the key.
+  /// Lazily inserts a value into the map if the key is not already present, using
+  /// a function that depends on the key of this entry.
   ///
-  /// If the key is not present in the map, the value returned by the provided
-  /// function [f], which takes the key as a parameter, is inserted. If the key
-  /// is already present, the existing value is returned.
+  /// ```dart
+  /// final map = {'key': 10};
+  ///
+  /// print(map.entry('key').orInsertWithKey((key) => key.length)); // 10
+  /// print(map.entry('other').orInsertWithKey((key) => key.length)); // 5
+  /// ```
   V orInsertWithKey(V Function(K key) f) => _map[key] ??= f(key);
+
+  @override
+  String toString() {
+    return '$key: ${_map[key]}';
+  }
 }
 
 /// An extension on [Map] that provides a convenient way to create [Entry]
