@@ -13,10 +13,10 @@ void main() {
 
   print(helloWorld);
 
-  final items = map
+  final item = map
       .entry(20)
       .andModify((value) => value.remove('Something from the list'))
-      .orInsertWithKey((key) => ['Item Number $key']);
+      .orNull;
 
-  print(items);
+  print(item);
 }

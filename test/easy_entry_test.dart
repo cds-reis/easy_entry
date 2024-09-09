@@ -1,94 +1,130 @@
-// Assuming the Entry and EasyEntry classes are defined in entry.dart
 import 'package:easy_entry/easy_entry.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Entry', () {
-    test('orInsert adds a value if the key is not present', () {
-      final map = <int, List<String>>{};
-      final entry = map.entry(10);
+    late Map<String, List<String>> map;
+    late Entry<String, List<String>> entry;
 
-      entry.orInsert(['Hello']);
-
-      expect(map[10], equals(['Hello']));
+    setUp(() {
+      map = {};
+      entry = map.entry('key');
     });
 
-    test('orInsert returns existing value if the key is present', () {
-      final map = <int, List<String>>{
-        10: ['Hello'],
-      };
+    group('andModify', () {
+      test('modifies existing value', () {
+        map['key'] = ['value1'];
+        entry.andModify((value) => value.add('value2'));
+        expect(map['key'], ['value1', 'value2']);
+      });
 
-      final entry = map.entry(10);
+      test('does nothing if key does not exist', () {
+        entry.andModify((value) => value.add('value2'));
+        expect(map['key'], null);
+      });
+    });
+    group('retainIf', () {
+      test('retains value if predicate is true', () {
+        map['key'] = ['value1'];
+        entry.retainIf((value) => value.contains('value1'));
+        expect(map['key'], ['value1']);
+      });
 
-      final value = entry.orInsert(['World']);
+      test('removes value if predicate is false', () {
+        map['key'] = ['value1'];
+        entry.retainIf((value) => value.isEmpty);
+        expect(map['key'], null);
+      });
+    });
+    group('remove', () {
+      test('removes entry if exists', () {
+        map['key'] = ['value1'];
+        final removedValue = entry.remove();
+        expect(removedValue, ['value1']);
+        expect(map['key'], null);
+      });
 
-      expect(value, equals(['Hello']));
-      expect(map[10], equals(['Hello']));
+      test('returns null if entry does not exist', () {
+        final removedValue = entry.remove();
+        expect(removedValue, null);
+      });
+    });
+    group('exists', () {
+      test('returns true if key exists', () {
+        map['key'] = ['value1'];
+        expect(entry.exists, true);
+      });
+
+      test('returns false if key does not exist', () {
+        expect(entry.exists, false);
+      });
     });
 
-    test('andModify applies function to the existing value', () {
-      final map = <int, List<String>>{
-        10: ['Hello']
-      };
+    group('orNull', () {
+      test('returns value if key exists', () {
+        map['key'] = ['value1'];
+        expect(entry.orNull, ['value1']);
+      });
 
-      final entry = map.entry(10);
+      test('returns null if key does not exist', () {
+        expect(entry.orNull, null);
+      });
+    });
+    group('orInsert', () {
+      test('inserts value if key does not exist', () {
+        final value = entry.orInsert(['new value']);
+        expect(value, ['new value']);
+        expect(map['key'], ['new value']);
+      });
 
-      entry.andModify((value) => value.add('World'));
+      test('returns existing value if key exists', () {
+        map['key'] = ['existing value'];
+        final value = entry.orInsert(['new value']);
+        expect(value, ['existing value']);
+      });
+    });
+    group('orInsertWith', () {
+      test('inserts value if key does not exist', () {
+        final value = entry.orInsertWith(() => ['lazy value']);
+        expect(value, ['lazy value']);
+        expect(map['key'], ['lazy value']);
+      });
 
-      expect(map[10], equals(['Hello', 'World']));
+      test('returns existing value if key exists', () {
+        map['key'] = ['existing value'];
+        final value = entry.orInsertWith(() => ['lazy value']);
+        expect(value, ['existing value']);
+      });
+    });
+    group('orInsertWithKey', () {
+      test('inserts value using key-dependent factory function', () {
+        final value = map.entry('key123').orInsertWithKey((key) => [key]);
+        expect(value, ['key123']);
+        expect(map['key123'], ['key123']);
+      });
+
+      test('returns existing value if key exists', () {
+        map['key123'] = ['existing value'];
+        final value = map.entry('key123').orInsertWithKey((key) => [key]);
+        expect(value, ['existing value']);
+      });
     });
 
-    test('andModify does nothing if key is not present', () {
-      final map = <int, List<String>>{};
-      final entry = map.entry(10);
-
-      entry.andModify((value) => value.add('World'));
-
-      expect(map[10], isNull);
+    test('andModify and orInsert', () {
+      final newEntry = map.entry('key2');
+      newEntry
+          .andModify((value) => value.add('value2'))
+          .orInsert(['initial value']);
+      expect(map['key2'], ['initial value']);
     });
 
-    test('orInsertWith adds value from function if key is not present', () {
-      final map = <int, List<String>>{};
-      final entry = map.entry(10);
-
-      entry.orInsertWith(() => ['Hello']);
-
-      expect(map[10], equals(['Hello']));
-    });
-
-    test('orInsertWith returns existing value if key is present', () {
-      final map = <int, List<String>>{
-        10: ['Existing']
-      };
-      final entry = map.entry(10);
-
-      final value = entry.orInsertWith(() => ['New']);
-
-      expect(value, equals(['Existing']));
-      expect(map[10], equals(['Existing']));
-    });
-
-    test(
-        'orInsertWithKey adds value from function with key if key is not present',
-        () {
-      final map = <int, List<String>>{};
-      final entry = map.entry(10);
-
-      entry.orInsertWithKey((key) => ['Value for $key']);
-
-      expect(map[10], equals(['Value for 10']));
-    });
-
-    test('orInsertWithKey returns existing value if key is present', () {
-      final map = <int, List<String>>{
-        10: ['Existing']
-      };
-      final entry = map.entry(10);
-
-      final value = entry.orInsertWithKey((key) => ['New Value']);
-
-      expect(value, equals(['Existing']));
-      expect(map[10], equals(['Existing']));
+    test('retainIf and orInsert', () {
+      map['key4'] = ['value1'];
+      map
+          .entry('key4')
+          .retainIf((value) => value.contains('value1'))
+          .orInsert(['default value']);
+      expect(map['key4'], ['value1']);
     });
   });
 }

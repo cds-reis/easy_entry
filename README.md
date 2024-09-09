@@ -11,30 +11,41 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/to/develop-packages). 
 -->
 
-# Easy Entry
+A simple, readable and concise way to deal with modifying, inserting and removing Map entries in Dart.
 
-A simple, readable and concise way to deal with modifying and inserting Map entries in Dart.
-
-## Features
-
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Inspired on Rust's [Entry API](https://doc.rust-lang.org/std/collections/hash_map/enum.Entry.html).
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+Add `easy_entry` to our dependencies in `pubspec.yaml`:
 
-```dart
-const like = 'sample';
+```yaml
+dependencies:
+  easy_entry: ^1.0.0
 ```
 
-## Additional information
+Next, import the library:
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+```dart
+import 'package:easy_entry/easy_entry.dart';
+```
+
+### Get a map's entry
+
+Use the `.entry(key)` method on a map to get an entry:
+
+```dart
+final map = <int, List<String>>{};
+
+map.entry(10);
+```
+
+Then, you can perform operations on your entry to modify, insert or remove it from the map:
+
+```dart
+final items = map
+      .entry(10)
+      .retainIf((value) => value.isNotEmpty)
+      .andModify((value) => value.add('Another Item'))
+      .orInsert([]);
+```
