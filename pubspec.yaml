@@ -1,6 +1,6 @@
 name: easy_entry
 description: A simple, readable and concise way to deal with modifying, inserting and removing Map entries in Dart.
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/cds-reis/easy_entry.git
 
 environment:
@@ -8,7 +8,6 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
-  # path: ^1.8.0
 
 dev_dependencies:
   lints: ^4.0.0

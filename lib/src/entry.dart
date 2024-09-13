@@ -43,9 +43,10 @@ final class Entry<K, V> {
   /// final planets = <String, List<String>>{
   ///   'terrestrial': 'Mercury', 'Venus', 'Earth',
   /// };
-  /// map.entry('terrestrial').andModify((value) => value.add('Mars'));
   ///
-  /// print(map); // {'terrestrial': 'Mercury', 'Venus', 'Earth', 'Mars'};
+  /// planets.entry('terrestrial').andModify((value) => value.add('Mars'));
+  ///
+  /// print(planets); // {'terrestrial': 'Mercury', 'Venus', 'Earth', 'Mars'};
   /// ```
   Entry<K, V> andModify(void Function(V value) f) {
     final value = _map[key];
@@ -54,6 +55,64 @@ final class Entry<K, V> {
     }
 
     f(value);
+
+    return Entry._(key: key, map: _map);
+  }
+
+  /// Replaces the value in the map if the entry exists.
+  ///
+  ///
+  /// ```dart
+  /// final planets = <int, String>{2: 'Earth'};
+  ///
+  /// planets.entry(2).update('Super Earth');
+  /// planets.entry(3).update('Mars');
+  ///
+  /// print(planets); // {2: 'Super Earth'};
+  /// ```
+  Entry<K, V> replace(V value) {
+    if (exists) {
+      _map[key] = value;
+    }
+
+    return Entry._(key: key, map: _map);
+  }
+
+  /// Lazily replaces the value in the map if the entry exists.
+  ///
+  ///
+  /// ```dart
+  /// final planets = <int, String>{2: 'Earth'};
+  ///
+  /// planets.entry(2).updateWith(() => 'Super Earth');
+  /// planets.entry(3).updateWith(() => 'Mars');
+  ///
+  /// print(planets); // {2: 'Super Earth'};
+  /// ```
+  Entry<K, V> replaceWith(V Function() f) {
+    if (exists) {
+      _map[key] = f();
+    }
+
+    return Entry._(key: key, map: _map);
+  }
+
+  /// Lazily replaces the value in the map if the entry exists, using
+  /// a function that depends on the key of this entry.
+  ///
+  ///
+  /// ```dart
+  /// final planets = <int, String>{2: 'Earth'};
+  ///
+  /// planets.entry(2).updateWith(() => 'Super Earth');
+  /// planets.entry(3).updateWith(() => 'Mars');
+  ///
+  /// print(planets); // {2: 'Super Earth'};
+  /// ```
+  Entry<K, V> replaceWithKey(V Function(K key) f) {
+    if (exists) {
+      _map[key] = f(key);
+    }
 
     return Entry._(key: key, map: _map);
   }

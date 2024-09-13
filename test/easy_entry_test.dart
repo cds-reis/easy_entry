@@ -23,6 +23,54 @@ void main() {
         expect(map['key'], null);
       });
     });
+    group('replace', () {
+      test('replaces the existing value', () {
+        map['key'] = ['value1'];
+        entry.replace(['value2']);
+        expect(map['key'], ['value2']);
+      });
+
+      test('does nothing if key does not exist', () {
+        entry.replace(['value2']);
+        expect(map['key'], null);
+      });
+    });
+    group('replaceWith', () {
+      test('replaces the existing value', () {
+        map['key'] = ['value1'];
+        entry.replaceWith(() => ['value2']);
+        expect(map['key'], ['value2']);
+      });
+
+      test('does nothing if key does not exist', () {
+        entry.replaceWith(() => ['value2']);
+        expect(map['key'], null);
+      });
+    });
+    group('replaceWithKey', () {
+      test('replaces the existing value', () {
+        map['key'] = ['value1'];
+        entry.replaceWithKey((key) => ['value2', key]);
+        expect(map['key'], ['value2', 'key']);
+      });
+
+      test('does nothing if key does not exist', () {
+        entry.replaceWithKey((key) => ['value2', key]);
+        expect(map['key'], null);
+      });
+    });
+    group('replace', () {
+      test('replaces the existing value', () {
+        map['key'] = ['value1'];
+        entry.replace(['value2']);
+        expect(map['key'], ['value2']);
+      });
+
+      test('does nothing if key does not exist', () {
+        entry.replace(['value2']);
+        expect(map['key'], null);
+      });
+    });
     group('retainIf', () {
       test('retains value if predicate is true', () {
         map['key'] = ['value1'];
